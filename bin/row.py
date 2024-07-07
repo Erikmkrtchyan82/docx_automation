@@ -3,7 +3,7 @@ from pydantic import BaseModel, field_validator, model_serializer
 from typing import Optional
 import re
 from nums import Nums
-
+from translator import translate
 
 FONT = "Times Unicode"
 
@@ -111,7 +111,7 @@ class Row(BaseModel):
             "xumb": RichText(self.xumb, font=FONT, size=10.5*2, bold=True, underline=True),
             "lot": RichText(self.lot, font=FONT, size=10.5*2, bold=True, underline=True),
             "entalot": RichText(self.entalot, font=FONT, size=12*2, bold=True, underline=True),
-            "guyqi_anvanum": RichText(self.guyqi_anvanum, font=FONT, size=12*2, bold=True, underline=True),
+            "guyqi_anvanum": RichText(translate(self.guyqi_anvanum), font=FONT, size=12*2, bold=True, underline=True),
             "meknarkayin_gin": RichText(self.meknarkayin_gin, font=FONT, size=12*2, bold=True),
             "knqman_or": RichText(self.knqman_or, font=FONT, size=12*2, bold=True),
             "guyqayin_hamar": RichText(self.guyqayin_hamar, font=FONT, size=12*2, bold=True),
