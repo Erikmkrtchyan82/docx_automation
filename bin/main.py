@@ -7,12 +7,10 @@ from argparse import ArgumentParser
 from typing import Dict
 from row import Row, FONT
 
-
 excel = pd.read_excel('data.xlsx', None)
 data = excel["data"].to_dict(orient="records")
 users_list = excel["user"].to_dict(orient="records")
 users = {}
-
 
 def ardzanagrutyun(row: Row):
     file_name = "ardzanagrutyun"

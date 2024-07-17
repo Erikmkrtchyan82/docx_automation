@@ -1,5 +1,5 @@
 from docxtpl import RichText
-from pydantic import BaseModel, field_validator, model_serializer
+from pydantic import BaseModel, Field, field_validator, model_serializer
 from typing import Optional
 import re
 from nums import Nums
@@ -8,35 +8,35 @@ from translator import translate
 FONT = "Times Unicode"
 
 class Row(BaseModel):
-    paymanagri_hamar: str
-    amsativ: str
-    gnord: str
+    paymanagri_hamar: str = Field(strict=False)
+    amsativ: str = Field(strict=False)
+    gnord: str = Field(strict=False)
     grancman_hamar: Optional[str]
     hvhh: Optional[str] = None
     andznagir: Optional[str] = None
-    trman_amsativ: str
-    um_koxmic: str
+    trman_amsativ: str = Field(strict=False)
+    um_koxmic: str = Field(strict=False)
     grancman_hasce: Optional[str]
-    xumb: str
-    lot: int
+    xumb: str = Field(strict=False)
+    lot: int  = Field(strict=False)
     entalot: Optional[str]
-    guyqi_anvanum: str
-    meknarkayin_gin: str
-    knqman_or: str
-    guyqayin_hamar: str
-    guyqi_arjeq: str
-    voroshman_amsativ: str
+    guyqi_anvanum: str = Field(strict=False)
+    meknarkayin_gin: str = Field(strict=False)
+    knqman_or: str = Field(strict=False)
+    guyqayin_hamar: str = Field(strict=False)
+    guyqi_arjeq: str = Field(strict=False)
+    voroshman_amsativ: str = Field(strict=False)
 
     @field_validator('paymanagri_hamar', mode='before')
     @classmethod
     def paymanagri_hamar_validator(cls, v: int) -> str:
-        return f"{v:d}"
+        return f"{int(v):d}"
 
     @field_validator('hvhh', mode='before')
     @classmethod
     def hvhh_validator(cls, v: int) -> str:
         if v == v:
-            return f'ՀՎՀՀ {v:08d},'
+            return f'ՀՎՀՀ {int(v):08d},'
         return None
 
     @field_validator('andznagir', mode='before')
@@ -71,7 +71,7 @@ class Row(BaseModel):
     @classmethod
     def entalot_validator(cls, v: int) -> str:
         if v == v:
-            return f'ենթալոտ {v}'
+            return f'ենթալոտ {int(v)}'
         return None
 
     @field_validator('lot', mode='before')
