@@ -77,7 +77,7 @@ def vkayakan():
             )
 
         lot_info = [
-            f"Խումբ {xumb} ԼՈՏ {lot} {entalot} մեկնարկային գինը {gin} ՀՀ դրամ," for xumb, lot, entalot, gin in lot_info]
+            f"Խումբ {xumb} ԼՈՏ {lot} {entalot or ''} մեկնարկային գինը {gin} ՀՀ դրամ," for xumb, lot, entalot, gin in lot_info]
 
         context = contents[0].model_dump()
         context.update({
