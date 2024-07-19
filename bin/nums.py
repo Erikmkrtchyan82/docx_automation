@@ -39,61 +39,75 @@ class Nums:
 
     @staticmethod
     def milions(num):
-        return "" if num == "" else "միլիոն"
+        if num == "" or num == '000':
+            return ""
+        if len(num) == 1 and num[0] == "1":
+            return "մեկ միլիոն"
+        return "միլիոն"
 
     @staticmethod
     def bilions(num):
-        return "" if num == "" else "միլիարդ"
+        if num == "" or num == '000':
+            return ""
+        if len(num) == 1 and num[0] == "1":
+            return "մեկ միլիարդ"
+        return "միլիարդ"
 
     @staticmethod
-    def _get_dec(num):
-        if len(num) != 2:
-            return ""
-        # 12,000
-        # 03,555
-        # 40,555
-        # 00,579
-        if num[0] == num[1] == "0":
-            return ""
-        if num[0] == "0":
-            return Nums.ones(num[1])
-        if num[0] == "1" and num[1] == "0":
-            return Nums.tens(num[0])[:-1]+Nums.ones(num[1])
-        return Nums.tens(num[0])+Nums.ones(num[1])
+    def get_dec(num: str):
+        if len(num) > 3:
+            return "**?"
+
+        res = []
+        if len(num) == 3:
+            if num[0] not in "01":
+                res.append(Nums.ones(num[0]))
+            if num[0] != "0":
+                res.append(Nums.hundreds(num[0]))
+            num = num[1:]
+
+        if len(num) == 2:
+            if num[0] != 0:
+                if num[0] == "1" and num[1] == "0":
+                    res.append(Nums.tens(num[0])[:-1])
+                else:
+                    res.append(Nums.tens(num[0]))
+            num = num[1:]
+
+        if len(num) == 1:
+            res.append(Nums.ones(num))
+
+        return " ".join([r for r in res if r])
 
     @staticmethod
     def empty(num):
         return ""
 
-    def construct(num: any) -> str:
+    @staticmethod
+    def construct(num):
         num = round(float(num))
         if num is not str:
             num = str(num)
 
+        if num == "1":
+            return Nums.get_dec(num)
+
         num = num.replace('.', '').replace(',', '').replace(' ', '')
+        num = split_num(num)
         result = []
-        i = 0
-        x = [Nums.empty, Nums.thousands, Nums.milions, Nums.bilions]
-        while len(num) > 2:
-            length = len(num)
-            number = num[length - 3:]
-            result.append(x[i](number[0]))
 
-            result.append(Nums._get_dec(number[1:]))
-            if number[0] != "0":
-                result.append(Nums.hundreds(number[0]))
-            if number[0] != "1":
-                result.append(Nums.ones(number[0]))
-
-            i += 1
-            num = num[:length - 3]
-
-        if len(num) != 0:
-            result.append(x[i](num[0]))
-            if len(num) == 1 and num[0] != '1':
-                result.append(Nums.ones(num[0]))
-            else:
-                result.append(Nums._get_dec(num))
+        for i, (num_chunk, multiply) in enumerate(zip(num, [Nums.empty, Nums.thousands, Nums.milions, Nums.bilions])):
+            dec = Nums.get_dec(num_chunk)
+            if dec or i > 1:
+                result.append(multiply(num_chunk))
+                if num_chunk != "1":
+                    result.append(dec)
 
         result = list(filter(lambda k: k, result))
         return " ".join(result[::-1])
+
+
+def split_num(num: str):
+    num_copy = num[::-1]
+    num_copy = [num_copy[i:i + 3] for i in range(0, len(num_copy), 3)]
+    return [x[::-1] for x in num_copy]
