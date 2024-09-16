@@ -21,10 +21,10 @@ class Row(BaseModel):
     lot: int  = Field(strict=False)
     entalot: Optional[str]
     guyqi_anvanum: str = Field(strict=False)
-    meknarkayin_gin: str = Field(strict=False)
+    meknarkayin_gin: float = Field(strict=False)
     knqman_or: str = Field(strict=False)
     guyqayin_hamar: str = Field(strict=False)
-    guyqi_arjeq: str = Field(strict=False)
+    guyqi_arjeq: float = Field(strict=False)
     voroshman_amsativ: str = Field(strict=False)
 
     @field_validator('paymanagri_hamar', mode='before')
@@ -71,7 +71,7 @@ class Row(BaseModel):
     @classmethod
     def entalot_validator(cls, v: int) -> str:
         if v == v:
-            return f'ենթալոտ {int(v)}'
+            return f'{int(v)}'
         return None
 
     @field_validator('lot', mode='before')
@@ -79,13 +79,14 @@ class Row(BaseModel):
     def lot_validator(cls, v: any) -> int:
         return int(v)
 
+    @staticmethod
+    def gin_to_str(gin):
+        return '{:,}'.format(int(gin)).replace(',', '.')
+
     @field_validator('meknarkayin_gin', 'guyqi_arjeq', mode='before')
     @classmethod
-    def gin_validator(cls, v: any) -> str:
-        return '{gin}/{gin_bar}/'.format(
-            gin='{:,}'.format(int(v)).replace(',', '.'),
-            gin_bar=Nums.construct(v)
-        )
+    def gin_validator(cls, v: any) -> int:
+        return v
 
     @field_validator('guyqayin_hamar', mode='before')
     @classmethod
@@ -110,11 +111,21 @@ class Row(BaseModel):
             "grancman_hasce": RichText(self.grancman_hasce, font=FONT, size=10.5*2, bold=True),
             "xumb": RichText(self.xumb, font=FONT, size=10.5*2, bold=True, underline=True),
             "lot": RichText(self.lot, font=FONT, size=10.5*2, bold=True, underline=True),
-            "entalot": RichText(self.entalot, font=FONT, size=12*2, bold=True, underline=True),
+            "entalot": RichText(f'ենթալոտ {self.entalot}', font=FONT, size=12*2, bold=True, underline=True),
             "guyqi_anvanum": RichText(translate(self.guyqi_anvanum), font=FONT, size=12*2, bold=True, underline=True),
-            "meknarkayin_gin": RichText(self.meknarkayin_gin, font=FONT, size=12*2, bold=True),
+             "meknarkayin_gin": RichText('{gin}/{gin_bar}/'.format(
+                        gin=Row.gin_to_str(self.meknarkayin_gin),
+                        gin_bar=Nums.construct(self.meknarkayin_gin), font=FONT, size=12*2, bold=True)
+                    ),
+
+            # "meknarkayin_gin": RichText(   self.meknarkayin_gin, font=FONT, size=12*2, bold=True),
             "knqman_or": RichText(self.knqman_or, font=FONT, size=12*2, bold=True),
             "guyqayin_hamar": RichText(self.guyqayin_hamar, font=FONT, size=12*2, bold=True),
-            "guyqi_arjeq": RichText(self.guyqi_arjeq, font=FONT, size=12*2, bold=True),
+            "guyqi_arjeq": RichText('{gin}/{gin_bar}/'.format(
+                        gin=Row.gin_to_str(self.guyqi_arjeq),
+                        gin_bar=Nums.construct(self.guyqi_arjeq), font=FONT, size=12*2, bold=True)
+                    ),
+
+            # "guyqi_arjeq": RichText(self.guyqi_arjeq, font=FONT, size=12*2, bold=True),
             "voroshman_amsativ": RichText(self.voroshman_amsativ, font=FONT, size=12*2, bold=False, underline=False),
         }
