@@ -132,11 +132,12 @@ def run_process(args, numbers):
                                 "entalot": obj.entalot if obj.entalot else "",
                                 "guyqi_anvanum": translate(obj.guyqi_anvanum),
                                 "meknarkayin_gin": Row.gin_to_str(obj.meknarkayin_gin),
-                                "guyqi_arjeq": Row.gin_to_str(obj.guyqi_arjeq)
+                                "guyqi_arjeq": Row.gin_to_str(obj.guyqi_arjeq),
+                                "guyqayin_hamar": obj.guyqayin_hamar
                             }
                         )
                     processes.append((index, executor.submit(ardzanagrutyun, obj, additional_info, "_grouped")))
-                    # processes.append((index, executor.submit(paymanagir, row, additional_info, "_grouped")))
+                    processes.append((index, executor.submit(paymanagir, row, additional_info, "_grouped")))
         processes.append((index, executor.submit(vkayakan)))
 
 
