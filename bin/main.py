@@ -6,35 +6,41 @@ from concurrent.futures import ProcessPoolExecutor
 from argparse import ArgumentParser
 from typing import Dict
 from row import Row, FONT
+from itertools import groupby
+from translator import translate
 
 excel = pd.read_excel('data.xlsx', None)
 data = excel["data"].to_dict(orient="records")
 users_list = excel["user"].to_dict(orient="records")
 users = {}
 
-def ardzanagrutyun(row: Row):
+def ardzanagrutyun(row: Row, additional_info={}, file_suffix=''):
     file_name = "ardzanagrutyun"
 
-    doc = DocxTemplate(path_join("templates", f"{file_name}_template.docx"))
+    doc = DocxTemplate(path_join("templates", f"{file_name}_template{file_suffix}.docx"))
 
-    save_path = f"{row.paymanagri_hamar}_{file_name}.docx"
+    save_path = f"{row.paymanagri_hamar}_{file_name}{file_suffix}.docx"
     if os.path.exists(save_path):
         return
 
-    doc.render(row.model_dump())
+    info = row.model_dump()
+    info.update(additional_info)
+    doc.render(info)
     doc.save(save_path)
 
 
-def paymanagir(row: Row):
+def paymanagir(row: Row, additional_info={}, file_suffix=''):
     file_name = "paymanagir"
 
-    doc = DocxTemplate(path_join("templates", f"{file_name}_template.docx"))
+    doc = DocxTemplate(path_join("templates", f"{file_name}_template{file_suffix}.docx"))
 
-    save_path = f"{row.paymanagri_hamar}_{file_name}.docx"
+    save_path = f"{row.paymanagri_hamar}_{file_name}{file_suffix}.docx"
     if os.path.exists(save_path):
         return
 
-    doc.render(row.model_dump())
+    info = row.model_dump()
+    info.update(additional_info)
+    doc.render(info)
     doc.save(save_path)
 
 
@@ -96,18 +102,76 @@ def vkayakan():
 def run_process(args, numbers):
     processes = []
     errors = []
-    with ProcessPoolExecutor(max_workers=os.cpu_count() // 2) as executor:
-        for index, raw_row in enumerate(data, 2):
+
+    grouped = {}
+    for paymanagri_hamar, obj in groupby(data, lambda row: row["paymanagri_hamar"]):
+        grouped[paymanagri_hamar] = list(obj)
+
+    max_workers = os.cpu_count() // 2
+    max_workers = 1
+    with ProcessPoolExecutor(max_workers=max_workers) as executor:
+        for index, d in enumerate(grouped, 2):
             run = True
             if args.numbers:
                 run = index in numbers
 
-            row = Row(**raw_row)
-
             if run:
-                processes.append((index, executor.submit(ardzanagrutyun, row)))
-                processes.append((index, executor.submit(paymanagir, row)))
-        processes.append((index, executor.submit(vkayakan)))
+                raw_row = grouped[d][0]
+                try:
+                    row = Row(**raw_row)
+                except Exception as e:
+                    errors.append('-'*100)
+                    errors.append(str(raw_row))
+                    errors.append(f"[E]: {e}")
+                    errors.append('-'*100)
+                    continue
+                if len(grouped[d]) == 1:
+                    processes.append((index, executor.submit(ardzanagrutyun, row)))
+                    processes.append((index, executor.submit(paymanagir, row)))
+                else:
+                    additional_info = {
+                        "groups": []
+                    }
+                    for obj in grouped[d]:
+                        try:
+                            obj = Row(**obj)
+                        except Exception as e:
+                            errors.append('-'*100)
+                            errors.append(str(obj))
+                            errors.append(f"[E]: {e}")
+                            errors.append(f"*** {obj['um_koxmic']}\n")
+                            errors.append('-'*100)
+                            continue
+                        additional_info["groups"].append(
+                            {
+                                "xumb": obj.xumb,
+                                "lot": obj.lot,
+                                "entalot": obj.entalot if obj.entalot else "",
+                                "guyqi_anvanum": translate(obj.guyqi_anvanum),
+                                "meknarkayin_gin": Row.gin_to_str(obj.meknarkayin_gin),
+                                "guyqi_arjeq": Row.gin_to_str(obj.guyqi_arjeq),
+                                "guyqayin_hamar": obj.guyqayin_hamar
+                            }
+                        )
+                    accumulate = sum(map(lambda o: int(o['guyqi_arjeq'].replace('.', '')), additional_info["groups"]))
+                    additional_info['accumulated'] = Row.gin_to_str(accumulate)
+                    processes.append((index, executor.submit(ardzanagrutyun, obj, additional_info, "_grouped")))
+                    processes.append((index, executor.submit(paymanagir, row, additional_info, "_grouped")))
+            processes.append((index, executor.submit(vkayakan)))
+
+
+    # with ProcessPoolExecutor(max_workers=os.cpu_count() // 2) as executor:
+    #     for index, raw_row in enumerate(data, 2):
+    #         run = True
+    #         if args.numbers:
+    #             run = index in numbers
+
+    #         row = Row(**raw_row)
+
+    #         if run:
+    #             processes.append((index, executor.submit(ardzanagrutyun, row)))
+    #             processes.append((index, executor.submit(paymanagir, row)))
+    #     processes.append((index, executor.submit(vkayakan)))
 
     for i, thread in processes:
         try:
