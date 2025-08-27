@@ -25,7 +25,7 @@ class Row(BaseModel):
     lot: int  = Field(strict=False)
     entalot: Optional[str]
     guyqi_anvanum: str = Field(strict=False)
-    meknarkayin_gin: int = Field(strict=False)
+    meknarkayin_gin: float = Field(strict=False)
     knqman_or: str = Field(strict=False)
     guyqayin_hamar: str = Field(strict=False)
     guyqi_arjeq: float = Field(strict=False)
