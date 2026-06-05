@@ -2,3 +2,4 @@
 data.xlsx
 *.docx
 !templates/*
+*.ipynb
