@@ -107,7 +107,9 @@ def run_process(args, numbers):
     for paymanagri_hamar, obj in groupby(data, lambda row: row["paymanagri_hamar"]):
         grouped[paymanagri_hamar] = list(obj)
 
-    with ProcessPoolExecutor(max_workers=os.cpu_count() // 2) as executor:
+    max_workers = os.cpu_count() // 2
+    max_workers = 1
+    with ProcessPoolExecutor(max_workers=max_workers) as executor:
         for index, d in enumerate(grouped, 2):
             run = True
             if args.numbers:
@@ -115,7 +117,14 @@ def run_process(args, numbers):
 
             if run:
                 raw_row = grouped[d][0]
-                row = Row(**raw_row)
+                try:
+                    row = Row(**raw_row)
+                except Exception as e:
+                    errors.append('-'*100)
+                    errors.append(str(raw_row))
+                    errors.append(f"[E]: {e}")
+                    errors.append('-'*100)
+                    continue
                 if len(grouped[d]) == 1:
                     processes.append((index, executor.submit(ardzanagrutyun, row)))
                     processes.append((index, executor.submit(paymanagir, row)))
@@ -124,7 +133,15 @@ def run_process(args, numbers):
                         "groups": []
                     }
                     for obj in grouped[d]:
-                        obj = Row(**obj)
+                        try:
+                            obj = Row(**obj)
+                        except Exception as e:
+                            errors.append('-'*100)
+                            errors.append(str(obj))
+                            errors.append(f"[E]: {e}")
+                            errors.append(f"*** {obj['um_koxmic']}\n")
+                            errors.append('-'*100)
+                            continue
                         additional_info["groups"].append(
                             {
                                 "xumb": obj.xumb,
@@ -136,9 +153,16 @@ def run_process(args, numbers):
                                 "guyqayin_hamar": obj.guyqayin_hamar
                             }
                         )
+                    guyqi_arjeq_sum = sum(map(lambda o: int(o['guyqi_arjeq'].replace('.', '')), additional_info["groups"]))
+                    meknarkayin_gin_sum = sum(map(lambda o: int(o['meknarkayin_gin'].replace('.', '')), additional_info["groups"]))
+                    accumulate = {
+                        'guyqi_arjeq': Row.gin_to_str(guyqi_arjeq_sum),
+                        'meknarkayin_gin': Row.gin_to_str(meknarkayin_gin_sum)
+                    }
+                    additional_info['accumulated'] = accumulate
                     processes.append((index, executor.submit(ardzanagrutyun, obj, additional_info, "_grouped")))
                     processes.append((index, executor.submit(paymanagir, row, additional_info, "_grouped")))
-        processes.append((index, executor.submit(vkayakan)))
+            processes.append((index, executor.submit(vkayakan)))
 
 
     # with ProcessPoolExecutor(max_workers=os.cpu_count() // 2) as executor:
