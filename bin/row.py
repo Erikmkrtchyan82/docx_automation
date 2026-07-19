@@ -12,6 +12,7 @@ DATE_FORMAT = '%d.%m.%Y'
 FONT = "Times Unicode"
 
 class Row(BaseModel):
+    id: int
     paymanagri_hamar: str = Field(strict=False)
     amsativ: str = Field(strict=False)
     gnord: str = Field(strict=False)
