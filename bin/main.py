@@ -27,6 +27,16 @@ def render_docx(template_name: str, save_path: str, context: dict, file_suffix='
 
 def ardzanagrutyun(row: Row, additional_info={}, file_suffix=''):
     file_name = "ardzanagrutyun"
+
+    if "grouped" in file_suffix:
+        all_entalots_empty = all(
+            not group["entalot"].strip()
+            for group in additional_info["groups"]
+        )
+
+        if all_entalots_empty:
+            file_suffix += "_without_entalot"
+
     save_path = f"{row.paymanagri_hamar}_{file_name}{file_suffix}.docx"
     if os.path.exists(save_path):
         return
@@ -38,6 +48,16 @@ def ardzanagrutyun(row: Row, additional_info={}, file_suffix=''):
 
 def paymanagir(row: Row, additional_info={}, file_suffix=''):
     file_name = "paymanagir"
+
+    if "grouped" in file_suffix:
+        all_entalots_empty = all(
+            not group["entalot"].strip()
+            for group in additional_info["groups"]
+        )
+
+        if all_entalots_empty:
+            file_suffix += "_without_entalot"
+
     save_path = f"{row.paymanagri_hamar}_{file_name}{file_suffix}.docx"
     if os.path.exists(save_path):
         return
