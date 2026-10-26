@@ -77,7 +77,7 @@ def vkayakan(data: list[Row]):
             return
 
         lot_info = [
-            f"Խումբ {row.xumb} ԼՈՏ {row.lot} {row.entalot or ''} մեկնարկային գինը {row.meknarkayin_gin} ՀՀ դրամ,"
+            f"Խումբ {row.xumb} ԼՈՏ {row.lot} {f'ենթալոտ {row.entalot}' if row.entalot else ''} մեկնարկային գինը {row.meknarkayin_gin} ՀՀ դրամ,"
             for row in contents
         ]
 
